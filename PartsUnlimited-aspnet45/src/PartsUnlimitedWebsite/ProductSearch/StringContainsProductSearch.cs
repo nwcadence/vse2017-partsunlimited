@@ -4,6 +4,7 @@ using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using PartsUnlimited.Models;
+using Microsoft.ApplicationInsights;
 
 namespace PartsUnlimited.ProductSearch
 {
@@ -36,19 +37,29 @@ namespace PartsUnlimited.ProductSearch
 
 		public string Depluralize(string query)
 		{
-			if (query.EndsWith("ies"))
-			{
-				query = query.Substring(0, query.Length - 3) + "y";
-			}
-			else if (query.EndsWith("es"))
-			{
-				query = query.Substring(0, query.Length - 1);
-			}
-			else if (query.EndsWith("s"))
-			{
-				query = query.Substring(1, query.Length);
-			}
-			return query.ToLowerInvariant();
+            var telemetry = new TelemetryClient();
+
+            try
+            {
+                if (query.EndsWith("ies"))
+                {
+                    query = query.Substring(0, query.Length - 3) + "y";
+                }
+                else if (query.EndsWith("es"))
+                {
+                    query = query.Substring(0, query.Length - 1);
+                }
+                else if (query.EndsWith("s"))
+                {
+                    query = query.Substring(1, query.Length);
+                }
+                return query.ToLowerInvariant();
+
+            } catch (Exception e)
+            {
+                telemetry.TrackException(e);
+                return e.ToString();
+            }
 		}
 	}
 }
